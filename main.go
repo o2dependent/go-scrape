@@ -46,10 +46,6 @@ func main() {
 			if !slices.Contains(emails, email) {
 				emails = append(emails, email)
 			}
-		} else if strings.HasPrefix(href, site) || strings.HasPrefix(href, "/") {
-			// TODO this is for later when doing site crawling if no sitemap.xml
-			// put into sites to crawl
-
 		}
 	})
 
