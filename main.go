@@ -39,7 +39,7 @@ func main() {
 		}
 	})
 
-	f, err := os.Create(strings.ReplaceAll(site, "/", "") + "_results.txt")
+	f, err := os.Create(strings.ReplaceAll(site, "/", "") + "_emails.txt")
 	if err != nil {
 		panic(err)
 	}
