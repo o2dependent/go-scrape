@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/o2dependent/go-scrape/utils"
 )
 
 // INIT IDEA
@@ -16,6 +18,18 @@ import (
 
 func main() {
 	site := "https://eolsen.dev"
+	writeDir := "output/"
+
+	directoryValid, err := utils.DirectoryExists(writeDir)
+	if !directoryValid || err != nil {
+		panic(errors.New("directory is invalid"))
+	}
+	f, err := os.Create(writeDir + strings.ReplaceAll(site, "/", "") + "_emails.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
 	emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
@@ -38,12 +52,6 @@ func main() {
 
 		}
 	})
-
-	f, err := os.Create(strings.ReplaceAll(site, "/", "") + "_emails.txt")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
 
 	c.OnHTML("*", func(h *colly.HTMLElement) {
 		text := h.Text
@@ -68,5 +76,4 @@ func main() {
 	})
 
 	c.Visit(site)
-	c.Wait()
 }
