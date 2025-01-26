@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -15,17 +16,22 @@ import (
 
 func main() {
 	site := "https://eolsen.dev"
+	emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 
-	c := colly.NewCollector()
+	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 
 	emails := []string{}
 
 	c.OnHTML("a[href]", func(h *colly.HTMLElement) {
 		href := h.Attr("href")
 
-		if strings.HasPrefix(href, "mailto:") && !slices.Contains(emails, href) {
+		if strings.HasPrefix(href, "mailto:") {
 			// if mailto put in emails
-			emails = append(emails, href)
+			email, _ := strings.CutPrefix(href, "mailto:")
+
+			if !slices.Contains(emails, email) {
+				emails = append(emails, email)
+			}
 		} else if strings.HasPrefix(href, site) || strings.HasPrefix(href, "/") {
 			// TODO this is for later when doing site crawling if no sitemap.xml
 			// put into sites to crawl
@@ -33,22 +39,34 @@ func main() {
 		}
 	})
 
-	// emailRegex, _ := regexp.Compile("/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/")
-	// c.OnHTML("*", func(h *colly.HTMLElement) {
-	// 	text := h.Text
+	f, err := os.Create(strings.ReplaceAll(site, "/", "") + "_results.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
 
-	// 	if emailRegex.Match(text) {
+	c.OnHTML("*", func(h *colly.HTMLElement) {
+		text := h.Text
 
-	// 	}
+		matches := emailRegex.FindAllString(text, -1)
 
-	// })
+		if len(matches) != 0 {
+			for _, match := range matches {
+				if !slices.Contains(emails, match) {
+					emails = append(emails, match)
+				}
+			}
+		}
+
+	})
 
 	c.OnScraped(func(r *colly.Response) {
-		for i, email := range emails {
-			fmt.Println(i, email)
+		for _, email := range emails {
+			f.WriteString(email + "\n")
 		}
 
 	})
 
 	c.Visit(site)
+	c.Wait()
 }
