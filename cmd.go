@@ -9,7 +9,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "scrape-emails",
+	Use:   "go-scrape",
 	Short: "CLI to scrape emails from websites",
 	Long:  "CLI utility to scrape emails from provided websites",
 	Run: func(cmd *cobra.Command, args []string) {
