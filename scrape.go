@@ -1,14 +1,14 @@
 package main
 
 import (
-	"regexp"
 	"slices"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/o2dependent/go-scrape/utils"
 )
 
-func scrape(site string, emailRegex *regexp.Regexp) []string {
+func scrape(site string) []string {
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 
 	emails := []string{}
@@ -29,7 +29,7 @@ func scrape(site string, emailRegex *regexp.Regexp) []string {
 	c.OnHTML("*", func(h *colly.HTMLElement) {
 		text := h.Text
 
-		matches := emailRegex.FindAllString(text, -1)
+		matches := utils.EmailRegex.FindAllString(text, -1)
 
 		if len(matches) != 0 {
 			for _, match := range matches {

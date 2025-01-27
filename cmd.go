@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
+	"log"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/o2dependent/go-scrape/utils"
@@ -15,22 +15,20 @@ var rootCmd = &cobra.Command{
 	Short: "CLI to scrape emails from websites",
 	Long:  "CLI utility to scrape emails from provided websites",
 	Run: func(cmd *cobra.Command, args []string) {
-		site := "https://eolsen.dev"
-		writeDir := "output/"
 
-		directoryValid, err := utils.DirectoryExists(writeDir)
+		directoryValid, err := utils.DirectoryExists(output)
 		if !directoryValid || err != nil {
-			panic(errors.New("directory is invalid"))
+			log.Println(errors.New("directory is invalid"))
+			os.Exit(1)
 		}
-		f, err := os.Create(writeDir + strings.ReplaceAll(site, "/", "") + "_emails.txt")
+		f, err := os.Create(output + strings.ReplaceAll(url, "/", "") + "_emails.txt")
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			os.Exit(1)
 		}
 		defer f.Close()
 
-		emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
-
-		emails := scrape(site, emailRegex)
+		emails := scrape(url)
 
 		for _, email := range emails {
 			f.WriteString(email + "\n")
