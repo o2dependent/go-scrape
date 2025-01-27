@@ -9,7 +9,7 @@ import (
 	"github.com/o2dependent/go-scrape/utils"
 )
 
-func createOutputFile() *os.File {
+func createOutputFile(url string) *os.File {
 	directoryValid, err := utils.DirectoryExists(output)
 	if !directoryValid || err != nil {
 		log.Println(errors.New("directory is invalid"))
