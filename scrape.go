@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"slices"
 	"strings"
 
@@ -10,8 +11,18 @@ import (
 
 func scrape(site string) []string {
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
+	c.Async = true
 
 	emails := []string{}
+
+	if useJS {
+		c.OnResponse(func(r *colly.Response) {
+			if err := initWithJavascript(r); err != nil {
+				log.Println(err)
+				return
+			}
+		})
+	}
 
 	c.OnHTML("a[href]", func(h *colly.HTMLElement) {
 		href := h.Attr("href")

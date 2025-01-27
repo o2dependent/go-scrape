@@ -15,7 +15,12 @@ var rootCmd = &cobra.Command{
 	Short: "CLI to scrape emails from websites",
 	Long:  "CLI utility to scrape emails from provided websites",
 	Run: func(cmd *cobra.Command, args []string) {
+		// validate cli flags
+		if string(output[len(output)-1:]) != "/" {
+			output = output + "/"
+		}
 
+		// validate directory
 		directoryValid, err := utils.DirectoryExists(output)
 		if !directoryValid || err != nil {
 			log.Println(errors.New("directory is invalid"))
