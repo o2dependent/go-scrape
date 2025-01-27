@@ -20,11 +20,12 @@ func failedGetTLDsMessage() {
 }
 
 func getTLDs() []string {
-	// check temp
-	tmpList, rerun := getTempTLD()
-	if !rerun && len(tmpList) > 0 {
-		fmt.Println("using cached TLD list")
-		return tmpList
+	if !ignoreTLDCache {
+		// check temp
+		tmpList, rerun := getTempTLD()
+		if !rerun && len(tmpList) > 0 {
+			return tmpList
+		}
 	}
 
 	// fetch tld list
