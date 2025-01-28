@@ -46,7 +46,7 @@ var rootCmd = &cobra.Command{
 			f := createOutputFile(url)
 			defer f.Close()
 
-			emails := scrape(url)
+			emails, numbers := scrape(url)
 
 			if validateTLD {
 				tlds := getTLDs()
@@ -57,7 +57,7 @@ var rootCmd = &cobra.Command{
 				})
 			}
 
-			generateOutput(f, emails)
+			generateOutput(f, emails, numbers)
 		}
 	},
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"slices"
 	"strings"
@@ -9,11 +10,12 @@ import (
 	"github.com/o2dependent/go-scrape/utils"
 )
 
-func scrape(site string) []string {
+func scrape(site string) ([]string, []string) {
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 	c.Async = true
 
 	emails := []string{}
+	numbers := []string{}
 
 	if useJS {
 		c.OnResponse(func(r *colly.Response) {
@@ -49,7 +51,16 @@ func scrape(site string) []string {
 				}
 			}
 		}
-
+		if collectPhoneNumbers {
+			extractedNumbers := extractAndFormatPhoneNumbers(text)
+			if len(extractedNumbers) > 0 {
+				for _, num := range extractedNumbers {
+					if !slices.Contains(numbers, num) {
+						numbers = append(numbers, num)
+					}
+				}
+			}
+		}
 	})
 
 	// c.OnScraped(func(r *colly.Response) {
@@ -61,5 +72,9 @@ func scrape(site string) []string {
 	c.Visit(site)
 	c.Wait()
 
-	return emails
+	for _, num := range numbers {
+		fmt.Println(num)
+	}
+
+	return emails, numbers
 }
