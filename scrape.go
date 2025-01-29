@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"slices"
 	"strings"
@@ -71,10 +70,6 @@ func scrape(site string) ([]string, []string) {
 
 	c.Visit(site)
 	c.Wait()
-
-	for _, num := range numbers {
-		fmt.Println(num)
-	}
 
 	return emails, numbers
 }

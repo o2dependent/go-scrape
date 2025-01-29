@@ -33,7 +33,7 @@ func generateOutput(f *os.File, emails []string, numbers []string) {
 		f.WriteString(strings.Join(emails, "\n"))
 
 		if collectPhoneNumbers {
-			f.WriteString("\nPhone\n")
+			f.WriteString("\n\nPhone\n")
 			f.WriteString(strings.Join(numbers, "\n"))
 		}
 	} else if fileType == "csv" {
