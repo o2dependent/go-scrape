@@ -62,12 +62,6 @@ func scrape(site string) ([]string, []string) {
 		}
 	})
 
-	// c.OnScraped(func(r *colly.Response) {
-	// 	for _, email := range emails {
-	// 		f.WriteString(email + "\n")
-	// 	}
-	// })
-
 	c.Visit(site)
 	c.Wait()
 
