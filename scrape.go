@@ -20,7 +20,10 @@ func scrape(url string, visitedUrls []string) (emails []string, numbers []string
 	if err != nil {
 		return
 	}
-	baseUrl := strings.Split(url, parsedUrl.Path)[0]
+	baseUrl := url
+	if parsedUrl.Path != "" {
+		baseUrl = strings.Split(url, parsedUrl.Path)[0]
+	}
 
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 	c.Async = true
