@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	URL "net/url"
 	"slices"
 	"strings"
 
@@ -22,15 +23,16 @@ var rootCmd = &cobra.Command{
 			return errors.New("requires at least one website")
 		}
 		urls = utils.Filter(args, func(a string) bool {
-			valid := utils.WebsiteRegex.MatchString(a)
-			if !valid {
+			_, err := URL.Parse(a)
+			if err != nil {
 				logger.Err.Println(a + " is an invalid website and will be skipped")
 			}
-			return valid
+			return err == nil
 		})
 		if len(urls) < 1 {
 			return errors.New("requires at least one valid website")
 		}
+
 		if len(urls) < len(args) {
 			logger.Warn.Println("\"http://\" or \"https://\" is required before website url to work")
 		}
@@ -53,27 +55,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		for _, url := range urls {
-			f := createOutputFile(url)
-			defer f.Close()
-
-			emails, numbers := scrape(url)
-
-			if validateTLD {
-				logger.Info.Println("validating emails by TLD")
-				tlds := getTLDs()
-				emails = utils.Filter(emails, func(s string) bool {
-					split := strings.Split(s, ".")
-					tld := strings.ToUpper(split[len(split)-1])
-					return slices.Contains(tlds, tld)
-				})
-			}
-
-			logger.Info.Printf("found %v emails\n", len(emails))
-			if collectPhoneNumbers {
-				logger.Info.Printf("found %v phone numbers\n", len(numbers))
-			}
-
-			generateOutput(f, emails, numbers)
+			handleScrape(url, 1, []string{})
 		}
 	},
 }

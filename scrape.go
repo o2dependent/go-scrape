@@ -1,6 +1,7 @@
 package main
 
 import (
+	URL "net/url"
 	"slices"
 	"strings"
 
@@ -9,14 +10,20 @@ import (
 	"github.com/o2dependent/go-scrape/utils"
 )
 
-func scrape(site string) ([]string, []string) {
-	logger.InfoAccent.Println("scraping: " + site)
+func scrape(url string, visitedUrls []string) (emails []string, numbers []string, additionalUrls []string) {
+	logger.InfoAccent.Println("scraping: " + url)
+
+	visitedUrls = append(visitedUrls, url)
+
+	// filter out path and find base url
+	parsedUrl, err := URL.Parse(url)
+	if err != nil {
+		return
+	}
+	baseUrl := strings.Split(url, parsedUrl.Path)[0]
 
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 	c.Async = true
-
-	emails := []string{}
-	numbers := []string{}
 
 	if useJS {
 		c.OnResponse(func(r *colly.Response) {
@@ -37,6 +44,8 @@ func scrape(site string) ([]string, []string) {
 			if !slices.Contains(emails, email) {
 				emails = append(emails, email)
 			}
+		} else if string(href[0]) == "/" && !slices.Contains(slices.Concat(visitedUrls, additionalUrls), baseUrl+href) {
+			additionalUrls = append(additionalUrls, baseUrl+href)
 		}
 	})
 
@@ -64,8 +73,45 @@ func scrape(site string) ([]string, []string) {
 		}
 	})
 
-	c.Visit(site)
+	c.Visit(url)
 	c.Wait()
 
-	return emails, numbers
+	return
+}
+
+func handleScrape(url string, depth int, visitedUrls []string) {
+	f := createOutputFile(url)
+	defer f.Close()
+
+	emails, numbers, additionalUrls := scrape(url, visitedUrls)
+
+	visitedUrls = append(visitedUrls, url)
+
+	if validateTLD && len(emails) > 0 {
+		logger.Info.Println("validating emails by TLD")
+		tlds := getTLDs()
+		emails = utils.Filter(emails, func(s string) bool {
+			split := strings.Split(s, ".")
+			tld := strings.ToUpper(split[len(split)-1])
+			return slices.Contains(tlds, tld)
+		})
+	}
+
+	logger.Info.Printf("found %v emails\n", len(emails))
+	if collectPhoneNumbers {
+		logger.Info.Printf("found %v phone numbers\n", len(numbers))
+	}
+
+	generateOutput(f, emails, numbers)
+
+	if depth < maxDepth {
+		if len(additionalUrls) == 0 {
+			logger.Warn.Println("no urls found on page")
+			return
+		}
+		logger.Warn.Printf("scraping depth: %v\n", depth+1)
+		for _, additionalUrl := range additionalUrls {
+			handleScrape(additionalUrl, depth+1, visitedUrls)
+		}
+	}
 }
