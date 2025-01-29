@@ -38,8 +38,17 @@ var rootCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// validate cli flags
+		// output
 		if string(output[len(output)-1:]) != "/" {
 			output = output + "/"
+		}
+
+		// outputTypes
+		fileType = strings.ToLower(fileType)
+		if !slices.Contains(outputTypes, fileType) {
+			fmt.Println(fileType + " is not a valid file type")
+			fmt.Println("defaulting to " + outputTypes[0])
+			fileType = outputTypes[0]
 		}
 
 		for _, url := range urls {
