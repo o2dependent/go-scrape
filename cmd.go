@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/o2dependent/go-scrape/logger"
 	"github.com/o2dependent/go-scrape/utils"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +24,7 @@ var rootCmd = &cobra.Command{
 		urls = utils.Filter(args, func(a string) bool {
 			valid := utils.WebsiteRegex.MatchString(a)
 			if !valid {
-				fmt.Println(a + " is an invalid website and will be skipped")
+				logger.Err.Println(a + " is an invalid website and will be skipped")
 			}
 			return valid
 		})
@@ -31,7 +32,7 @@ var rootCmd = &cobra.Command{
 			return errors.New("requires at least one valid website")
 		}
 		if len(urls) < len(args) {
-			fmt.Println("\"http://\" or \"https://\" is required before website url to work")
+			logger.Warn.Println("\"http://\" or \"https://\" is required before website url to work")
 		}
 
 		return nil
@@ -58,12 +59,18 @@ var rootCmd = &cobra.Command{
 			emails, numbers := scrape(url)
 
 			if validateTLD {
+				logger.Info.Println("validating emails by TLD")
 				tlds := getTLDs()
 				emails = utils.Filter(emails, func(s string) bool {
 					split := strings.Split(s, ".")
 					tld := strings.ToUpper(split[len(split)-1])
 					return slices.Contains(tlds, tld)
 				})
+			}
+
+			logger.Info.Printf("found %v emails\n", len(emails))
+			if collectPhoneNumbers {
+				logger.Info.Printf("found %v phone numbers\n", len(numbers))
 			}
 
 			generateOutput(f, emails, numbers)

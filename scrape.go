@@ -1,15 +1,17 @@
 package main
 
 import (
-	"log"
 	"slices"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/o2dependent/go-scrape/logger"
 	"github.com/o2dependent/go-scrape/utils"
 )
 
 func scrape(site string) ([]string, []string) {
+	logger.InfoAccent.Println("scraping: " + site)
+
 	c := colly.NewCollector(colly.IgnoreRobotsTxt())
 	c.Async = true
 
@@ -19,7 +21,7 @@ func scrape(site string) ([]string, []string) {
 	if useJS {
 		c.OnResponse(func(r *colly.Response) {
 			if err := initWithJavascript(r); err != nil {
-				log.Println(err)
+				logger.Err.Println(err)
 				return
 			}
 		})

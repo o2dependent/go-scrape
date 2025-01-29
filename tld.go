@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/o2dependent/go-scrape/logger"
 	"github.com/o2dependent/go-scrape/utils"
 )
 
@@ -15,8 +15,8 @@ var tldListURL = "https://data.iana.org/TLD/tlds-alpha-by-domain.txt"
 var tldListTempFileName = "scrapper-tld-list"
 
 func failedGetTLDsMessage() {
-	fmt.Println("failed to get TLD list")
-	fmt.Println("ignoring validating TLD")
+	logger.Err.Println("failed to get TLD list")
+	logger.Warn.Println("ignoring validating TLD")
 }
 
 func getTLDs() []string {
@@ -27,7 +27,7 @@ func getTLDs() []string {
 			return tmpList
 		}
 	}
-
+	logger.Info.Println("fetching TLD list")
 	// fetch tld list
 	tldList := []string{}
 
@@ -57,7 +57,6 @@ func getTLDs() []string {
 
 	tldList = strings.Split(resBodyStr, "\n")
 
-	// TODO: store in tmp
 	createTempTLD(resBody)
 
 	tldList = tldList[1:]

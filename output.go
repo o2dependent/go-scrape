@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/o2dependent/go-scrape/logger"
 	"github.com/o2dependent/go-scrape/utils"
 )
 
@@ -14,13 +14,13 @@ var outputTypes = []string{"txt", "csv", "json", "yaml"}
 func createOutputFile(url string) *os.File {
 	directoryValid, err := utils.DirectoryExists(output)
 	if !directoryValid || err != nil {
-		log.Println(errors.New("directory is invalid"))
+		logger.Err.Println(errors.New("\"" + output + "\" is an invalid directory"))
 		os.Exit(1)
 	}
 
 	f, err := os.Create(output + strings.ReplaceAll(url, "/", "") + "." + fileType)
 	if err != nil {
-		log.Println(err)
+		logger.Err.Println("failed to create output file")
 		os.Exit(1)
 	}
 
@@ -28,6 +28,7 @@ func createOutputFile(url string) *os.File {
 }
 
 func generateOutput(f *os.File, emails []string, numbers []string) {
+	logger.Info.Println("saving data to " + f.Name())
 	if fileType == "txt" {
 		f.WriteString("Emails\n")
 		f.WriteString(strings.Join(emails, "\n"))
