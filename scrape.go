@@ -2,6 +2,7 @@ package main
 
 import (
 	URL "net/url"
+	"os"
 	"slices"
 	"strings"
 
@@ -21,7 +22,9 @@ func scrape(url string, visitedUrls []string) (emails []string, numbers []string
 		return
 	}
 	baseUrl := url
-	if parsedUrl.Path != "" {
+	if parsedUrl.Path == "/" {
+		baseUrl = url[:len(url)-1]
+	} else if parsedUrl.Path != "" {
 		baseUrl = strings.Split(url, parsedUrl.Path)[0]
 	}
 
@@ -82,9 +85,12 @@ func scrape(url string, visitedUrls []string) (emails []string, numbers []string
 	return
 }
 
-func handleScrape(url string, depth int, visitedUrls []string) {
-	f := createOutputFile(url)
-	defer f.Close()
+func handleScrape(url string, depth int, visitedUrls []string) ([]string, []string) {
+	var f *os.File
+	if depth == 1 || !consolidateDepthFiles {
+		f = createOutputFile(url)
+		defer f.Close()
+	}
 
 	emails, numbers, additionalUrls := scrape(url, visitedUrls)
 
@@ -105,16 +111,29 @@ func handleScrape(url string, depth int, visitedUrls []string) {
 		logger.Info.Printf("found %v phone numbers\n", len(numbers))
 	}
 
-	generateOutput(f, emails, numbers)
+	// here so that if the process is canceled while not consolidating the first url is saved
+	if !consolidateDepthFiles {
+		generateOutput(f, emails, numbers)
+	}
 
 	if depth < maxDepth {
 		if len(additionalUrls) == 0 {
 			logger.Warn.Println("no urls found on page")
-			return
+			return emails, numbers
 		}
 		logger.Warn.Printf("scraping depth: %v\n", depth+1)
 		for _, additionalUrl := range additionalUrls {
-			handleScrape(additionalUrl, depth+1, visitedUrls)
+			dEmails, dNumbers := handleScrape(additionalUrl, depth+1, visitedUrls)
+			if consolidateDepthFiles {
+				emails = append(emails, dEmails...)
+				numbers = append(numbers, dNumbers...)
+			}
 		}
 	}
+
+	if depth == 1 && consolidateDepthFiles {
+		generateOutput(f, emails, numbers)
+	}
+
+	return emails, numbers
 }
