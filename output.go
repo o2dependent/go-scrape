@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/o2dependent/go-scrape/logger"
-	"github.com/o2dependent/go-scrape/utils"
+	"github.com/o2dependent/goscrape/logger"
+	"github.com/o2dependent/goscrape/utils"
 )
 
 var outputTypes = []string{"txt", "csv", "json", "yaml"}

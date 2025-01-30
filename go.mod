@@ -1,4 +1,4 @@
-module github.com/o2dependent/go-scrape
+module github.com/o2dependent/goscrape
 
 go 1.23.4
 

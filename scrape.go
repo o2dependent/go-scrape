@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/o2dependent/go-scrape/logger"
-	"github.com/o2dependent/go-scrape/utils"
+	"github.com/o2dependent/goscrape/logger"
+	"github.com/o2dependent/goscrape/utils"
 )
 
 func scrape(url string, visitedUrls []string) (emails []string, numbers []string, additionalUrls []string) {

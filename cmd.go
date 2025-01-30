@@ -7,15 +7,15 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/o2dependent/go-scrape/logger"
-	"github.com/o2dependent/go-scrape/utils"
+	"github.com/o2dependent/goscrape/logger"
+	"github.com/o2dependent/goscrape/utils"
 	"github.com/spf13/cobra"
 )
 
 var urls []string
 
 var rootCmd = &cobra.Command{
-	Use:   "go-scrape [...websites]",
+	Use:   "goscrape [...websites]",
 	Short: "CLI to scrape emails from websites",
 	Long:  "CLI utility to scrape emails from provided websites",
 	Args: func(cmd *cobra.Command, args []string) error {
