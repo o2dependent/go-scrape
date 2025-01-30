@@ -1,4 +1,4 @@
-package main
+package goscrape
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ import (
 
 var urls []string
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "goscrape [...websites]",
 	Short: "CLI to scrape emails from websites",
 	Long:  "CLI utility to scrape emails from provided websites",
