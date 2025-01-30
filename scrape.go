@@ -132,6 +132,10 @@ func handleScrape(url string, depth int, visitedUrls []string) ([]string, []stri
 	}
 
 	if depth == 1 && consolidateDepthFiles {
+		slices.Sort(emails)
+		emails = slices.Compact(emails)
+		slices.Sort(numbers)
+		numbers = slices.Compact(numbers)
 		generateOutput(f, emails, numbers)
 	}
 
